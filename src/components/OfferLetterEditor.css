@@ -1,3 +1,49 @@
+/* === LOGO IMAGE STYLES === */
+.logo-img {
+  text-align: center;       /* Logo alignment context */
+  max-width: 180px;   
+  margin-bottom: 16px;
+}
+
+.logo-img img {
+  display: inline-block;    /* Alignable inside .logo-img */
+  width: auto;              /* Use natural width */
+       /* Cap width responsively */
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Placeholder style before image is uploaded */
+.logo-placeholder {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 180px;
+  height: 80px;
+  border: 2px dashed #ccc;
+  border-radius: 6px;
+  color: #999;
+  font-size: 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+/* Alignment helpers */
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+}
+
+.align-right {
+  text-align: right;
+}
+
+/* === EDITOR STYLES === */
 .editor-wrapper {
   padding: 24px;
   font-family: 'Inter', sans-serif;
@@ -5,45 +51,60 @@
 
 .editor-toolbar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  gap: 10px;
+  background: #fff;
+  padding: 10px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px 10px 0 0;
 }
 
 .editor-toolbar button,
 .editor-toolbar select {
-  background-color: #f4f4f4;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
   padding: 6px 10px;
-  cursor: pointer;
+  border-radius: 6px;
   font-size: 14px;
+  cursor: pointer;
 }
 
-.editor-toolbar select {
-  height: 32px;
-}
-
-.editor-meta input {
-  display: block;
-  margin: 8px 0;
-  padding: 8px;
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.editor-area {
-  border: 1px solid #ccc;
-  padding: 20px;
-  min-height: 300px;
-  border-radius: 6px;
+.editor-canvas {
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
   background-color: #fff;
-  margin-top: 16px;
+  padding: 24px;
+  min-height: 400px;
 }
 
+.editable-area {
+  outline: none;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1f1f1f;
+}
+
+/* Text heading styles */
+.editable-area h3 { font-size: 24px; font-weight: 700; }
+.editable-area h4 { font-size: 20px; font-weight: 600; }
+.editable-area h5 { font-size: 18px; font-weight: 500; }
+.editable-area h6 { font-size: 16px; font-weight: 500; }
+.editable-area p  { font-size: 15px; }
+
+/* Editor tags (like {{CandidateName}}) */
+.editor-tag {
+  background: #e8e8e8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 2px;
+  display: inline-block;
+}
+
+/* Footer buttons */
 .editor-footer {
-  margin-top: 20px;
+  margin-top: 24px;
   display: flex;
   gap: 12px;
 }
@@ -51,9 +112,9 @@
 .editor-footer button {
   background-color: #4c4cf1;
   color: white;
-  padding: 10px 16px;
-  border-radius: 20px;
+  padding: 10px 18px;
   font-weight: 600;
   border: none;
+  border-radius: 20px;
   cursor: pointer;
 }

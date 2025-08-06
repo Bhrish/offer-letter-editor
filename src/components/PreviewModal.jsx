@@ -1,21 +1,29 @@
 // src/components/PreviewModal.jsx
 import React from 'react';
+import './PreviewModal.css';
 
 export default function PreviewModal({ template, onClose }) {
-  const downloadPdf = () => alert('Download logic goes here');
-  const shareLink = () => alert('Share logic goes here');
-
+  const { contentHtml } = template;
+  
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <button className="close-btn" onClick={onClose}>×</button>
-        {template.logoUrl && <img src={template.logoUrl} alt="logo" style={{ maxHeight: '80px' }}/>}
-        <h2>{template.meta.position} Offer Letter</h2>
-        <p><strong>Candidate:</strong> {template.meta.candidateName}</p>
-        <div dangerouslySetInnerHTML={{ __html: template.content }} />
-        <div className="modal-footer">
-          <button onClick={downloadPdf}>Download</button>
-          <button onClick={shareLink}>Share</button>
+    <div className="preview-overlay">
+      <div className="preview-modal">
+        <div className="preview-header">
+          <h2>Preview</h2>
+          <p className="preview-subtitle">Offer letter preview</p>
+          <button className="preview-close" onClick={onClose}>&times;</button>
+        </div>
+
+        <div className="preview-body">
+          <div
+            className="preview-letter"
+            dangerouslySetInnerHTML={{ __html: contentHtml }}
+          />
+        </div>
+
+        <div className="preview-footer">
+          <button className="share-btn">Share</button>
+          <button className="save-btn">Save Templated</button>
         </div>
       </div>
     </div>

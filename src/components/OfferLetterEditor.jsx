@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { fetchTemplateById, saveTemplate } from '../api';
+import { saveTemplate } from '../api';
 import PreviewModal from './PreviewModal';
 import './OfferLetterEditor.css';
 
@@ -7,26 +7,20 @@ const defaultTemplate = {
   name: '',
   logoUrl: '',
   meta: { candidateName: '', position: '' },
-  contentHtml: `<h3>Heading 3</h3><h4>Heading 4</h4><h5>Heading 5</h5><h6>Heading 6</h6>
-<p>In the year 2147, X_AE_B_22, a synthetic intelligence, awakens in the heart of Neo–Tokyo, the sprawling megacity of towering neon spires and endless bustling streets.</p>`
+  contentHtml: `
+    <div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>
+    <h3>Heading 3</h3>
+    <p>Start writing your offer letter here...</p>
+  `
 };
 
 export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel }) {
-  const [template, setTemplate] = useState(defaultTemplate);
+  const [template] = useState(defaultTemplate);
   const [showPreview, setShowPreview] = useState(false);
-  const fileInputRef = useRef(null);
-  const editorRef = useRef();
 
-  useEffect(() => {
-    if (templateId) {
-      fetchTemplateById(templateId).then(t => {
-        setTemplate({
-          ...t,
-          contentHtml: t.contentHtml || defaultTemplate.contentHtml
-        });
-      });
-    }
-  }, [templateId]);
+  const editorRef = useRef();
+  const fileInputRef = useRef(null);
+  const logoInputRef = useRef(null);
 
   const exec = (cmd, val = null) => {
     document.execCommand(cmd, false, val);
@@ -40,10 +34,85 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
     range.insertNode(span);
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      alert("Please select a valid image file.");
+      return;
+    }
+
+    const imageURL = URL.createObjectURL(file);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'resizable-image';
+    const img = document.createElement('img');
+    img.src = imageURL;
+    wrapper.appendChild(img);
+
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(wrapper);
+    }
+
+    e.target.value = '';
+  };
+
+  const handleLogoUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file || !file.type.startsWith("image/")) {
+    alert("Invalid image file.");
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+
+  const logoBlock = document.getElementById('logo-block');
+  if (logoBlock) {
+    // Replace inner HTML only, not outer div
+    logoBlock.className = 'logo-img align-center';
+    logoBlock.innerHTML = `<img src="${url}" style="max-width: 100%" />`;
+    
+  }
+
+  e.target.value = '';
+};
+const getPreviewContentHtml = () => {
+  const rawHtml = editorRef.current?.innerHTML || '';
+
+  // Regex matches the entire logo block including nested tags and line breaks
+  const logoRegex = /<div id="logo-block"[^>]*>[\s\S]*?<\/div>/;
+
+  const replacedHtml = rawHtml.replace(
+    logoRegex,
+    template.logoUrl
+      ? `<div id="logo-block" class="logo-img align-center">
+           <img src="${template.logoUrl}" alt="Company Logo" />
+         </div>`
+      : `<div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>`
+  );
+
+  return replacedHtml;
+};
+
+
+  const replaceLogoPlaceholder = (html, logoUrl) => {
+    return html.replace(
+      /<div id="logo-block"[^>]*>.*?<\/div>/,
+      logoUrl
+        ? `<div id="logo-block" class="logo-img align-center"><img src="${logoUrl}" alt="Company Logo" style="max-width: 100%" /></div>`
+        : `<div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>`
+    );
+  };
+
   const handleSave = async (overwrite = false) => {
+    const rawHtml = editorRef.current.innerHTML;
+    const finalHtml = replaceLogoPlaceholder(rawHtml, template.logoUrl);
+
     const payload = {
       ...template,
-      contentHtml: editorRef.current.innerHTML,
+      contentHtml: finalHtml,
       createdBy: 'Current User',
       createOn: new Date().toISOString().split('T')[0]
     };
@@ -51,22 +120,26 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
     onSaveComplete(res.id);
   };
 
-  const handleImageUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  useEffect(() => {
+    const editor = editorRef.current;
 
-  // Validate image type (optional)
-  if (!file.type.startsWith("image/")) {
-    alert("Please upload a valid image file.");
-    return;
-  }
+    const handleClick = (e) => {
+      const el = e.target.closest('#logo-block');
+      if (el) {
+        logoInputRef.current?.click();
+      }
+    };
 
-   const url = URL.createObjectURL(file);
-  document.execCommand("insertImage", false, url);
+    if (editor) {
+      editor.addEventListener('click', handleClick);
+    }
 
-  e.target.value = ''; // reset input so same file can be selected again
-};
-
+    return () => {
+      if (editor) {
+        editor.removeEventListener('click', handleClick);
+      }
+    };
+  }, []);
 
   return (
     <div className="editor-wrapper">
@@ -86,11 +159,38 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
         <button onClick={() => exec('insertUnorderedList')}><i className="fas fa-list-ul"></i></button>
         <button onClick={() => exec('insertOrderedList')}><i className="fas fa-list-ol"></i></button>
         <button onClick={() => fileInputRef.current.click()}><i className="fas fa-image"></i></button>
-        <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleImageUpload}/>
         <button onClick={() => insertTag('CandidateName')}>Tags</button>
+
+        <select
+          onChange={(e) => {
+            const logoBlock = document.getElementById('logo-block');
+            if (logoBlock) {
+              logoBlock.classList.remove('align-left', 'align-center', 'align-right');
+              logoBlock.classList.add(e.target.value);
+            }
+          }}
+        >
+          <option value="align-left">Align Left</option>
+          <option value="align-center">Align Center</option>
+          <option value="align-right">Align Right</option>
+        </select>
       </div>
 
       <div className="editor-canvas">
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+        <input
+          type="file"
+          accept="image/*"
+          ref={logoInputRef}
+          style={{ display: 'none' }}
+          onChange={handleLogoUpload}
+        />
         <div
           ref={editorRef}
           className="editable-area"
@@ -107,8 +207,14 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
         <button onClick={onCancel}>Discard</button>
       </div>
 
-      {showPreview && (
-        <PreviewModal template={template} onClose={() => setShowPreview(false)} />
+     {showPreview && (
+        <PreviewModal
+          template={{
+            ...template,
+            contentHtml: getPreviewContentHtml()  // ✅ live editor + logo processed
+          }}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </div>
   );
