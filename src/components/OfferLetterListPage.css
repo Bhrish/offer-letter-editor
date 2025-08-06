@@ -1,0 +1,93 @@
+.editor-wrapper {
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px 10px 0 0;
+  padding: 10px 16px;
+}
+
+.editor-toolbar button,
+.editor-toolbar select {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.editor-toolbar i {
+  font-size: 14px;
+}
+
+.editor-canvas {
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: #fff;
+  padding: 24px;
+}
+
+.editable-area {
+  min-height: 500px;
+  outline: none;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.editable-area h3 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.editable-area h4 {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.editable-area h5 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.editable-area h6 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.editable-area p {
+  font-size: 15px;
+  color: #1f1f1f;
+}
+
+.editor-tag {
+  background: #e8e8e8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 2px;
+  display: inline-block;
+}
+
+.editor-footer {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+}
+
+.editor-footer button {
+  background-color: #4c4cf1;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}

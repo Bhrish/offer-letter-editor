@@ -1,0 +1,59 @@
+.editor-wrapper {
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.editor-toolbar button,
+.editor-toolbar select {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.editor-toolbar select {
+  height: 32px;
+}
+
+.editor-meta input {
+  display: block;
+  margin: 8px 0;
+  padding: 8px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.editor-area {
+  border: 1px solid #ccc;
+  padding: 20px;
+  min-height: 300px;
+  border-radius: 6px;
+  background-color: #fff;
+  margin-top: 16px;
+}
+
+.editor-footer {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.editor-footer button {
+  background-color: #4c4cf1;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
