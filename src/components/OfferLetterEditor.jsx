@@ -30,6 +30,7 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
   const [template, setTemplate] = useState(defaultTemplate);
   const [showPreview, setShowPreview] = useState(false);
   const [logoAlignment, setLogoAlignment] = useState(companyLogo.alignment);
+  const [toast, setToast] = useState(null);
 
   const editorRef = useRef();
   const fileInputRef = useRef(null);
@@ -62,9 +63,13 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
   const handleSave = async (overwrite = false) => {
     const rawHtml = editorRef.current.innerHTML;
     const finalHtml = replaceLogoPlaceholder(rawHtml);
+    const headingMatch = rawHtml.match(/<h3[^>]*>(.*?)<\/h3>/i);
+    const heading = headingMatch ? headingMatch[1].trim() : 'Untitled';
+
 
     const payload = {
       ...template,
+      name: heading,
       contentHtml: finalHtml,
       createdBy: 'Current User',
       createOn: new Date().toISOString().split('T')[0]
@@ -87,10 +92,18 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
       createOn: new Date().toISOString().split('T')[0]
     };
 
-    const res = await saveTemplate(payload);
-    setTemplate(prev => ({ ...prev, name: heading }));
-    onSaveComplete(res.id);
-    setShowPreview(false);
+    try {
+      const res = await saveTemplate(payload);
+      setTemplate(prev => ({ ...prev, name: heading }));
+      onSaveComplete(res.id);
+      setToast('Template saved successfully.');
+    } catch (err) {
+      console.error(err);
+      setToast('Failed to save template.');
+    } finally {
+      setShowPreview(false);
+      setTimeout(() => setToast(null), 3000);
+    }
   };
 
   useEffect(() => {
@@ -156,6 +169,8 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
         <button onClick={() => handleSave(true)}>{uiText.buttons.saveChanges}</button>
         <button onClick={onCancel}>{uiText.buttons.discard}</button>
       </div>
+
+      {toast && <div className="toast-message">{toast}</div>}
 
       {showPreview && (
         <PreviewModal
