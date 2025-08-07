@@ -3,9 +3,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { saveTemplate } from '../api';
 import PreviewModal from './PreviewModal';
 import logoConfig from '../config/logoConfig.json';
+import uiText from '../config/uiTextConfig.json';
 import './OfferLetterEditor.css';
 
-const companyKey = 'companyA'; // To be made dynamic
+const companyKey = 'companyA';
 const companyLogo = logoConfig[companyKey];
 
 const getLogoHtml = (alignment = companyLogo.alignment) => {
@@ -20,8 +21,8 @@ const defaultTemplate = {
   meta: { candidateName: '', position: '' },
   contentHtml: `
     ${getLogoHtml()}
-    <h3>Heading 3</h3>
-    <p>Start writing your offer letter here...</p>
+    <h3>${uiText.labels.heading}</h3>
+    <p>${uiText.labels.paragraphPlaceholder}</p>
   `
 };
 
@@ -130,10 +131,10 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
       </div>
 
       <div className="editor-footer">
-        <button onClick={() => setShowPreview(true)}>Preview</button>
-        <button onClick={() => handleSave(false)}>Save As New</button>
-        <button onClick={() => handleSave(true)}>Save Changes</button>
-        <button onClick={onCancel}>Discard</button>
+        <button onClick={() => setShowPreview(true)}>{uiText.buttons.preview}</button>
+        <button onClick={() => handleSave(false)}>{uiText.buttons.saveNew}</button>
+        <button onClick={() => handleSave(true)}>{uiText.buttons.saveChanges}</button>
+        <button onClick={onCancel}>{uiText.buttons.discard}</button>
       </div>
 
       {showPreview && (
