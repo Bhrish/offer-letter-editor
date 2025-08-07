@@ -1,0 +1,19 @@
+{
+  "buttons": {
+    "preview": "Preview",
+    "saveNew": "Save As New",
+    "saveChanges": "Save Changes",
+    "discard": "Discard",
+    "share": "Share",
+    "saveTemplate": "Save Template",
+    "download": "Download"
+  },
+  "labels": {
+    "heading": "Heading 3",
+    "paragraphPlaceholder": "Start writing your offer letter here..."
+  },
+  "messages": {
+    "shareEmailSubject": "Offer Letter",
+    "shareEmailBody": "Please find the attached offer letter."
+  }
+}
