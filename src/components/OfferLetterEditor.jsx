@@ -27,7 +27,7 @@ const defaultTemplate = {
 };
 
 export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel }) {
-  const [template] = useState(defaultTemplate);
+  const [template, setTemplate] = useState(defaultTemplate);
   const [showPreview, setShowPreview] = useState(false);
   const [logoAlignment, setLogoAlignment] = useState(companyLogo.alignment);
 
@@ -71,6 +71,26 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
     };
     const res = await saveTemplate(payload, overwrite ? templateId : null);
     onSaveComplete(res.id);
+  };
+
+  const handleSaveFromPreview = async () => {
+    const rawHtml = editorRef.current?.innerHTML || '';
+    const headingMatch = rawHtml.match(/<h3[^>]*>(.*?)<\/h3>/i);
+    const heading = headingMatch ? headingMatch[1].trim() : 'Untitled';
+    const finalHtml = replaceLogoPlaceholder(rawHtml);
+
+    const payload = {
+      ...template,
+      name: heading,
+      contentHtml: finalHtml,
+      createdBy: 'Current User',
+      createOn: new Date().toISOString().split('T')[0]
+    };
+
+    const res = await saveTemplate(payload);
+    setTemplate(prev => ({ ...prev, name: heading }));
+    onSaveComplete(res.id);
+    setShowPreview(false);
   };
 
   useEffect(() => {
@@ -141,6 +161,7 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
         <PreviewModal
           template={{ ...template, contentHtml: getPreviewContentHtml() }}
           onClose={() => setShowPreview(false)}
+          onSave={handleSaveFromPreview}
         />
       )}
     </div>

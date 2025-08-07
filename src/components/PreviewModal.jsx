@@ -46,7 +46,8 @@ const handleDownload = () => {
         <div className="preview-footer">
           <button className="share-btn" onClick={handleShare}>{uiText.buttons.share}</button>
           <button className="share-btn" onClick={handleDownload}>{uiText.buttons.download}</button>
-          <button className="save-btn" onClick={onSave}>{uiText.buttons.saveTemplate}</button>
+         <button className="save-btn" onClick={onSave}>{uiText.buttons.saveTemplate}</button>
+
         </div>
       </div>
     </div>
