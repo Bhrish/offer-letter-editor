@@ -1,14 +1,25 @@
+// src/components/OfferLetterEditor.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import { saveTemplate } from '../api';
 import PreviewModal from './PreviewModal';
+import logoConfig from '../config/logoConfig.json';
 import './OfferLetterEditor.css';
+
+const companyKey = 'companyA'; // To be made dynamic
+const companyLogo = logoConfig[companyKey];
+
+const getLogoHtml = (alignment = companyLogo.alignment) => {
+  return `
+    <div id="logo-block" class="logo-img align-${alignment}">
+      <img src="${companyLogo.src}" style="max-width: ${companyLogo.width}" alt="Company Logo" />
+    </div>`;
+};
 
 const defaultTemplate = {
   name: '',
-  logoUrl: '',
   meta: { candidateName: '', position: '' },
   contentHtml: `
-    <div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>
+    ${getLogoHtml()}
     <h3>Heading 3</h3>
     <p>Start writing your offer letter here...</p>
   `
@@ -17,10 +28,10 @@ const defaultTemplate = {
 export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel }) {
   const [template] = useState(defaultTemplate);
   const [showPreview, setShowPreview] = useState(false);
+  const [logoAlignment, setLogoAlignment] = useState(companyLogo.alignment);
 
   const editorRef = useRef();
   const fileInputRef = useRef(null);
-  const logoInputRef = useRef(null);
 
   const exec = (cmd, val = null) => {
     document.execCommand(cmd, false, val);
@@ -34,81 +45,22 @@ export default function OfferLetterEditor({ templateId, onSaveComplete, onCancel
     range.insertNode(span);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file || !file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
-      return;
-    }
-
-    const imageURL = URL.createObjectURL(file);
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'resizable-image';
-    const img = document.createElement('img');
-    img.src = imageURL;
-    wrapper.appendChild(img);
-
-    const sel = window.getSelection();
-    if (sel.rangeCount > 0) {
-      const range = sel.getRangeAt(0);
-      range.deleteContents();
-      range.insertNode(wrapper);
-    }
-
-    e.target.value = '';
+  const getPreviewContentHtml = () => {
+    const rawHtml = editorRef.current?.innerHTML || '';
+    const logoRegex = /<div id="logo-block"[^>]*>[\s\S]*?<\/div>/;
+    return rawHtml.replace(logoRegex, getLogoHtml(logoAlignment));
   };
 
-  const handleLogoUpload = (e) => {
-  const file = e.target.files[0];
-  if (!file || !file.type.startsWith("image/")) {
-    alert("Invalid image file.");
-    return;
-  }
-
-  const url = URL.createObjectURL(file);
-
-  const logoBlock = document.getElementById('logo-block');
-  if (logoBlock) {
-    // Replace inner HTML only, not outer div
-    logoBlock.className = 'logo-img align-center';
-    logoBlock.innerHTML = `<img src="${url}" style="max-width: 100%" />`;
-    
-  }
-
-  e.target.value = '';
-};
-const getPreviewContentHtml = () => {
-  const rawHtml = editorRef.current?.innerHTML || '';
-
-  // Regex matches the entire logo block including nested tags and line breaks
-  const logoRegex = /<div id="logo-block"[^>]*>[\s\S]*?<\/div>/;
-
-  const replacedHtml = rawHtml.replace(
-    logoRegex,
-    template.logoUrl
-      ? `<div id="logo-block" class="logo-img align-center">
-           <img src="${template.logoUrl}" alt="Company Logo" />
-         </div>`
-      : `<div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>`
-  );
-
-  return replacedHtml;
-};
-
-
-  const replaceLogoPlaceholder = (html, logoUrl) => {
+  const replaceLogoPlaceholder = (html) => {
     return html.replace(
-      /<div id="logo-block"[^>]*>.*?<\/div>/,
-      logoUrl
-        ? `<div id="logo-block" class="logo-img align-center"><img src="${logoUrl}" alt="Company Logo" style="max-width: 100%" /></div>`
-        : `<div id="logo-block" class="logo-placeholder align-center">[ Click to Upload Logo ]</div>`
+      /<div id="logo-block"[^>]*>[\s\S]*?<\/div>/,
+      getLogoHtml(logoAlignment)
     );
   };
 
   const handleSave = async (overwrite = false) => {
     const rawHtml = editorRef.current.innerHTML;
-    const finalHtml = replaceLogoPlaceholder(rawHtml, template.logoUrl);
+    const finalHtml = replaceLogoPlaceholder(rawHtml);
 
     const payload = {
       ...template,
@@ -122,24 +74,14 @@ const getPreviewContentHtml = () => {
 
   useEffect(() => {
     const editor = editorRef.current;
+    if (!editor) return;
 
-    const handleClick = (e) => {
-      const el = e.target.closest('#logo-block');
-      if (el) {
-        logoInputRef.current?.click();
-      }
-    };
-
-    if (editor) {
-      editor.addEventListener('click', handleClick);
-    }
-
-    return () => {
-      if (editor) {
-        editor.removeEventListener('click', handleClick);
-      }
-    };
-  }, []);
+    const logoHtml = getLogoHtml(logoAlignment);
+    editor.innerHTML = editor.innerHTML.replace(
+      /<div id="logo-block"[^>]*>[\s\S]*?<\/div>/,
+      logoHtml
+    );
+  }, [logoAlignment]);
 
   return (
     <div className="editor-wrapper">
@@ -160,19 +102,13 @@ const getPreviewContentHtml = () => {
         <button onClick={() => exec('insertOrderedList')}><i className="fas fa-list-ol"></i></button>
         <button onClick={() => fileInputRef.current.click()}><i className="fas fa-image"></i></button>
         <button onClick={() => insertTag('CandidateName')}>Tags</button>
-
         <select
-          onChange={(e) => {
-            const logoBlock = document.getElementById('logo-block');
-            if (logoBlock) {
-              logoBlock.classList.remove('align-left', 'align-center', 'align-right');
-              logoBlock.classList.add(e.target.value);
-            }
-          }}
+          value={`align-${logoAlignment}`}
+          onChange={(e) => setLogoAlignment(e.target.value.replace('align-', ''))}
         >
-          <option value="align-left">Align Left</option>
-          <option value="align-center">Align Center</option>
-          <option value="align-right">Align Right</option>
+          <option value="align-left">Logo Left</option>
+          <option value="align-center">Logo Center</option>
+          <option value="align-right">Logo Right</option>
         </select>
       </div>
 
@@ -182,14 +118,7 @@ const getPreviewContentHtml = () => {
           accept="image/*"
           ref={fileInputRef}
           style={{ display: 'none' }}
-          onChange={handleImageUpload}
-        />
-        <input
-          type="file"
-          accept="image/*"
-          ref={logoInputRef}
-          style={{ display: 'none' }}
-          onChange={handleLogoUpload}
+          onChange={() => {}}
         />
         <div
           ref={editorRef}
@@ -207,12 +136,9 @@ const getPreviewContentHtml = () => {
         <button onClick={onCancel}>Discard</button>
       </div>
 
-     {showPreview && (
+      {showPreview && (
         <PreviewModal
-          template={{
-            ...template,
-            contentHtml: getPreviewContentHtml()  // ✅ live editor + logo processed
-          }}
+          template={{ ...template, contentHtml: getPreviewContentHtml() }}
           onClose={() => setShowPreview(false)}
         />
       )}
